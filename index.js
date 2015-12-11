@@ -38,8 +38,6 @@ module.exports = function proxyMiddleware(options) {
       } else {
         opts.path = options.pathname + url;
       }
-    } else if (url) {
-      opts.path = slashJoin(options.pathname, url);
     } else {
       opts.path = options.pathname;
     }
