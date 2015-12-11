@@ -1,12 +1,14 @@
 var os = require('os');
 var http = require('http');
 var https = require('https');
+var _ = require('lodash');
+var urlLib = require('url');
 var owns = {}.hasOwnProperty;
 
 module.exports = function proxyMiddleware(options) {
   //enable ability to quickly pass a url for shorthand setup
   if(typeof options === 'string'){
-      options = require('url').parse(options);
+    options = require('url').parse(options);
   }
 
   var httpLib = options.protocol === 'https:' ? https : http;
@@ -39,7 +41,7 @@ module.exports = function proxyMiddleware(options) {
         opts.path = options.pathname + url;
       }
     } else {
-      opts.path = options.pathname;
+      opts.path = urlLib.resolve(options.pathname, _.values(req.params).join('/'));
     }
     opts.method = req.method;
     opts.headers = options.headers ? merge(req.headers, options.headers) : req.headers;
@@ -97,8 +99,8 @@ function rewriteCookieHosts(existingHeaders, opts, applyTo, req) {
   }
 
   var existingCookies = existingHeaders['set-cookie'],
-      rewrittenCookies = [],
-      rewriteHostname = (true === opts.cookieRewrite) ? os.hostname() : opts.cookieRewrite;
+    rewrittenCookies = [],
+    rewriteHostname = (true === opts.cookieRewrite) ? os.hostname() : opts.cookieRewrite;
 
   if (!Array.isArray(existingCookies)) {
     existingCookies = [ existingCookies ];
@@ -132,8 +134,8 @@ function extend(obj, src) {
 
 //merges data without changing state in either argument
 function merge(src1, src2) {
-    var merged = {};
-    extend(merged, src1);
-    extend(merged, src2);
-    return merged;
+  var merged = {};
+  extend(merged, src1);
+  extend(merged, src2);
+  return merged;
 }
